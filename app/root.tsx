@@ -36,12 +36,13 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 };
 
 export default function App() {
-  const { env, session } = useLoaderData<typeof loader>();
-  console.log(session, 'server session');
+  const { env } = useLoaderData<typeof loader>();
   const [supabase] = useState(() => createBrowserClient<Database>(env.SUPABASE_URL, env.SUPABASE_ANON_KEY));
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => console.log(session, 'client session'));
+    supabase.auth.onAuthStateChange((event, session) => {
+      
+    });
   }, []);
 
   return (
