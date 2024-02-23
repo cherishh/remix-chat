@@ -1,9 +1,9 @@
 import { cssBundleHref } from '@remix-run/css-bundle';
-import type { LinksFunction, LoaderFunctionArgs } from '@remix-run/node';
-import { Links, LiveReload, Meta, Outlet, Scripts, ScrollRestoration, json, useLoaderData } from '@remix-run/react';
+import { LinksFunction, LoaderFunctionArgs, json } from '@remix-run/node';
+import { Links, LiveReload, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData } from '@remix-run/react';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { useEffect, useState } from 'react';
-import type { Database } from "db_types";
+import type { Database } from 'db_types';
 import createServerSupabase from 'utils/supabase.server';
 import { createBrowserClient } from '@supabase/auth-helpers-remix';
 
@@ -23,12 +23,14 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
   const response = new Response();
 
-  const supabase = createServerSupabase({ 
+  const supabase = createServerSupabase({
     request,
     response,
   });
 
-  const { data: { session }} = await supabase.auth.getSession();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
 
   return json({ env, session }, { headers: response.headers });
 };
@@ -39,8 +41,8 @@ export default function App() {
   const [supabase] = useState(() => createBrowserClient<Database>(env.SUPABASE_URL, env.SUPABASE_ANON_KEY));
 
   useEffect(() => {
-    supabase.auth.getSession().then(({data: {session}}) => console.log(session, 'client session'))
-  }, [])
+    supabase.auth.getSession().then(({ data: { session } }) => console.log(session, 'client session'));
+  }, []);
 
   return (
     <html lang='en'>
@@ -51,7 +53,7 @@ export default function App() {
         <Links />
       </head>
       <body>
-        <Outlet context={{supabase}} />
+        <Outlet context={{ supabase }} />
         <ScrollRestoration />
         <Scripts />
         <LiveReload />

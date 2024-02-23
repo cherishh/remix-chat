@@ -1,13 +1,13 @@
-import type { LoaderFunctionArgs, MetaFunction } from '@remix-run/node';
-import { json, useLoaderData } from '@remix-run/react';
+import { LoaderFunctionArgs, MetaFunction, json } from '@remix-run/node';
+import { useLoaderData } from '@remix-run/react';
 import Login from 'components/login';
 import createServerSupabase from 'utils/supabase.server';
 
-export const loader = async ({request}: LoaderFunctionArgs) => {
+export const loader = async ({ request }: LoaderFunctionArgs) => {
   const response = new Response();
   const supabase = createServerSupabase({
     request,
-    response
+    response,
   });
   const { data } = await supabase.from('messages').select('*');
   return json({ messages: data }, { headers: response.headers });
@@ -18,11 +18,11 @@ export const meta: MetaFunction = () => {
 };
 
 export default function Index() {
-  const { data } = useLoaderData();
+  const { messages } = useLoaderData<typeof loader>();
   return (
     <>
       <Login />
-      <pre>{JSON.stringify(data, null, 2)}</pre>
+      <pre>{JSON.stringify(messages, null, 2)}</pre>
     </>
-  )
+  );
 }
