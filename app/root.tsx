@@ -1,6 +1,6 @@
 import { cssBundleHref } from '@remix-run/css-bundle';
 import { LinksFunction, LoaderFunctionArgs, json } from '@remix-run/node';
-import { Links, LiveReload, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData } from '@remix-run/react';
+import { Links, LiveReload, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData, useRevalidator } from '@remix-run/react';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { useEffect, useState } from 'react';
 import type { Database } from 'db_types';
@@ -36,14 +36,22 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 };
 
 export default function App() {
-  const { env } = useLoaderData<typeof loader>();
+  const { env, session } = useLoaderData<typeof loader>();
+  const revalidator = useRevalidator();
   const [supabase] = useState(() => createBrowserClient<Database>(env.SUPABASE_URL, env.SUPABASE_ANON_KEY));
+  const serverAccessToken = session?.access_token;
 
   useEffect(() => {
-    supabase.auth.onAuthStateChange((event, session) => {
-      
+    const {data:{ subscription }} = supabase.auth.onAuthStateChange((event, session) => {
+      if (session?.access_token !== serverAccessToken) {
+        revalidator.revalidate();
+      }
     });
-  }, []);
+
+    return () => {
+      subscription.unsubscribe();
+    }
+  }, [supabase, serverAccessToken, revalidator]);
 
   return (
     <html lang='en'>
